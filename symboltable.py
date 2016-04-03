@@ -19,27 +19,26 @@ def mGlobal(name):
         stack.append(name)
         global symbolTableInUse
         symbolTableInUse = name
-        symbolTable[name] = {}
+        symbolTable[symbolTableInUse] = {}
         if symbolTableInUse != "GLOBAL":
             mainGlobal.append("")
         mainGlobal.append("Symbol table " + symbolTableInUse)
     else:
         symbolTable.pop(stack.pop())
 
-
-def startBlock():
-    global increment
-    name = "BLOCK " + str(increment)
-    stack.append(name)
-    increment += 1
-    global symbolTableInUse
-    symbolTableInUse = name
-    symbolTable[symbolTableInUse] = {}
-    mainGlobal.append("")
-    mainGlobal.append("Symbol table " + symbolTableInUse)
-
-def stopBlock():
-    symbolTable.pop(stack.pop())
+def block(num):
+    if(num == 1):
+        global increment
+        name = "BLOCK " + str(increment)
+        stack.append(name)
+        increment += 1
+        global symbolTableInUse
+        symbolTableInUse = name
+        symbolTable[symbolTableInUse] = {}
+        mainGlobal.append("")
+        mainGlobal.append("Symbol table " + symbolTableInUse)
+    else:
+        symbolTable.pop(stack.pop())
 
 def pushToTable(name,type,scope,value):
     global err

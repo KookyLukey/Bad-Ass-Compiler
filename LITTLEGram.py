@@ -288,21 +288,21 @@ def p_mulop (p):
 
 def p_if_stmt(p):
     '''if_stmt : start_if LPAREN cond RPAREN decl stmt_list else_part ENDIF '''
-    symboltable.stopBlock()
+    symboltable.block(0)
 
 def p_start_if(p):
     '''start_if : IF'''
-    symboltable.startBlock()
+    symboltable.block(1)
 
 def p_else_part(p):
     '''else_part : start_else decl stmt_list
     | empty'''
     if len(p) > 3:
-        symboltable.stopBlock()
+        symboltable.block(0)
 
 def p_start_else(p):
     '''start_else : ELSE'''
-    symboltable.startBlock()
+    symboltable.block(1)
 
 def p_cond(p):
     '''cond : expr compop expr'''
@@ -317,13 +317,11 @@ def p_while_stmt(p):
 
 def p_start_while(p):
     '''start_while : WHILE'''
-    #print("enter")
-    symboltable.startBlock()
+    symboltable.block(1)
 
 def p_end_while(p):
     '''end_while : ENDWHILE'''
-    #print("exit")
-    symboltable.stopBlock()
+    symboltable.block(0)
 
 def p_empty(p):
     'empty :'
@@ -340,7 +338,6 @@ parser = yacc.yacc()
 symboltable.mGlobal("GLOBAL")
 
 parser.parse(data)
-
 
 symboltable.mGlobal(0)
 
