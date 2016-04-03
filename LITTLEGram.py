@@ -169,7 +169,7 @@ def p_id_list(p):
 def p_id_tail(p):
     '''id_tail : COMMA id id_tail
     | empty'''
-    if len(p) == 4: # not empty
+    if len(p) == 4:
         p[0]=[p[2]] + p[3]
     else:
         p[0]=[]
@@ -196,11 +196,11 @@ def p_func_declarations(p):
 
 def p_func_decl(p):
     '''func_decl : start_of_func LPAREN param_decl_list RPAREN BEGIN func_body END '''
-    symboltable.stopFunc()
+    symboltable.mGlobal(0)
 
 def p_start_of_func(p):
     '''start_of_func : FUNCTION any_type id'''
-    symboltable.startFunc(p[3])
+    symboltable.mGlobal(p[3])
 
 def p_func_body(p):
     '''func_body : decl stmt_list '''
@@ -337,12 +337,12 @@ def p_error(p):
 
 parser = yacc.yacc()
 
-symboltable.startFunc("GLOBAL")
+symboltable.mGlobal("GLOBAL")
 
 parser.parse(data)
 
 
-symboltable.stopFunc()
+symboltable.mGlobal(0)
 
 if not error:
     symboltable.printSymbolTablez()

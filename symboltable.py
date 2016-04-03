@@ -6,9 +6,6 @@ symbolTable = {}
 stack = []
 mainGlobal = []
 
-def stopBlock():
-    symbolTable.pop(stack.pop())
-
 def decl(name,type,value):
     if (value):
         pushToTable(name, "STRING", symbolTableInUse,value)
@@ -17,17 +14,18 @@ def decl(name,type,value):
         pushToTable(name, type, symbolTableInUse, 0)
         mainGlobal.append("name " + name + " type " + type)
 
-def startFunc(name):
-    stack.append(name)
-    global symbolTableInUse
-    symbolTableInUse = name
-    symbolTable[name] = {}
-    if symbolTableInUse != "GLOBAL":
-        mainGlobal.append("")
-    mainGlobal.append("Symbol table " + symbolTableInUse)
+def mGlobal(name):
+    if(name):
+        stack.append(name)
+        global symbolTableInUse
+        symbolTableInUse = name
+        symbolTable[name] = {}
+        if symbolTableInUse != "GLOBAL":
+            mainGlobal.append("")
+        mainGlobal.append("Symbol table " + symbolTableInUse)
+    else:
+        symbolTable.pop(stack.pop())
 
-def stopFunc():
-    symbolTable.pop(stack.pop())
 
 def startBlock():
     global increment
@@ -39,6 +37,9 @@ def startBlock():
     symbolTable[symbolTableInUse] = {}
     mainGlobal.append("")
     mainGlobal.append("Symbol table " + symbolTableInUse)
+
+def stopBlock():
+    symbolTable.pop(stack.pop())
 
 def pushToTable(name,type,scope,value):
     global err
