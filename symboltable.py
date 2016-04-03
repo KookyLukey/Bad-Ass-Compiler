@@ -16,8 +16,8 @@ def decl(name,type,value):
 
 def mGlobal(name):
     if(name):
-        stack.append(name)
         global symbolTableInUse
+        stack.append(name)
         symbolTableInUse = name
         symbolTable[symbolTableInUse] = {}
         if symbolTableInUse != "GLOBAL":
@@ -29,10 +29,10 @@ def mGlobal(name):
 def block(num):
     if(num == 1):
         global increment
+        global symbolTableInUse
         name = "BLOCK " + str(increment)
         stack.append(name)
         increment += 1
-        global symbolTableInUse
         symbolTableInUse = name
         symbolTable[symbolTableInUse] = {}
         mainGlobal.append("")
