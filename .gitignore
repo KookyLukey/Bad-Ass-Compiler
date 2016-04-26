@@ -1,0 +1,10 @@
+env/
+.idea/
+__pycache__/
+*/usertest/*
+parser.out
+parsetab.py
+*.pyc
+.DS_STORE
+tiny
+*.zip
