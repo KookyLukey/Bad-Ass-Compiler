@@ -1,3 +1,10 @@
+class IRN:
+    def __init__(self, instr, op1, op2, result):
+        self.instr = instr
+        self.op1 = op1
+        self.op2 = op2
+        self.result = result
+
 class Node(object):
 
     def __init__(self, data=None, next_node=None):
