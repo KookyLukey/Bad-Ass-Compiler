@@ -118,10 +118,16 @@ while True:
     tok = lexer.token()
     if not tok:
         break      # No more input
+
+counter = 1
+counter2 = 1
 # Program
+
+print(";IR Code")
 
 def p_program(p):
     'program : PROGRAM id BEGIN pgm_body END '
+
 
 def p_id(p):
     'id : IDENTIFIER'
@@ -202,6 +208,8 @@ def p_func_decl(p):
 def p_start_of_func(p):
     '''start_of_func : FUNCTION any_type id'''
     symboltable.mGlobal(p[3])
+    print(";LABEL " + p[3])
+    print(";LINK")
 
 def p_func_body(p):
     '''func_body : decl stmt_list '''
@@ -230,12 +238,20 @@ def p_assign_stmt(p):
 
 def p_assign_expr(p):
     '''assign_expr : id ASSIGN expr '''
+    if (p[3] is not None):
+        global counter
+        print(";STOREI " + p[3] + " $T" + str(counter))
+        print(";STOREI $T" + str(counter) + " " + p[1])
+        counter = counter + 1
 
 def p_read_stmt(p):
     '''read_stmt : READ LPAREN id_list RPAREN SEMICOLON '''
+    print(";READ " + p[3][0])
 
 def p_write_stmt(p):
     '''write_stmt : WRITE LPAREN id_list RPAREN SEMICOLON '''
+    print(";WRITEI " + p[3][0])
+    print(";WRITES " + p[3][1])
 
 def p_return_stmt(p):
     '''return_stmt : RETURN expr SEMICOLON '''
@@ -244,13 +260,19 @@ def p_return_stmt(p):
 
 def p_expr(p):
     '''expr : expr_prefix factor '''
+    p[0] = p[2]
 
 def p_expr_prefix(p):
     '''expr_prefix : expr_prefix factor addop
     | empty'''
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = p[1]
 
 def p_factor(p):
     '''factor : factor_prefix postfix_expr '''
+    p[0] = p[2]
 
 def p_factor_prefix(p):
     '''factor_prefix : factor_prefix postfix_expr mulop
@@ -259,6 +281,7 @@ def p_factor_prefix(p):
 def p_postfix_expr(p):
     '''postfix_expr : primary
     | call_expr '''
+    p[0] = p[1]
 
 def p_call_expr(p):
     '''call_expr : id LPAREN expr_list RPAREN '''
@@ -276,20 +299,29 @@ def p_primary(p):
     | id
     | INTLITERAL
     | FLOATLITERAL'''
+    if len(p) == 2:
+        p[0] = p[1]
 
 def p_addop(p):
     '''addop : PLUS
     | MINUS '''
+    print(";ADDI")
+    p[0] = p[1]
 
 def p_mulop (p):
     '''mulop : MULTIPLY
     | DIVIDE '''
+    print(";MULTI")
+    p[0] = p[1]
 
 # Complex Statements and conditions
 
 def p_if_stmt(p):
     '''if_stmt : start_if LPAREN cond RPAREN decl stmt_list else_part ENDIF '''
+    global counter2
     symboltable.block(0)
+    print(";LABEL label" + str(counter2))
+    counter2 = counter2 + 1
 
 def p_start_if(p):
     '''start_if : IF'''
@@ -310,6 +342,18 @@ def p_cond(p):
 
 def p_compop(p):
     '''compop : COMPOP '''
+    if (p[1] == '!='):
+        print(";EQI")
+    if (p[1] == '='):
+        print(";NEI")
+    if (p[1] == '<='):
+        print(";GTI")
+    if (p[1] == '<'):
+        print(";GEI")
+    if (p[1] == '>='):
+        print(";LTI")
+    if (p[1] == '>'):
+        print(";LEI")
 
 # While Statements
 
@@ -318,7 +362,10 @@ def p_while_stmt(p):
 
 def p_start_while(p):
     '''start_while : WHILE'''
+    global counter2
     symboltable.block(1)
+    print(";LABEL label" + str(counter2))
+    counter2 = counter2 + 1
 
 def p_end_while(p):
     '''end_while : ENDWHILE'''
@@ -342,5 +389,5 @@ parser.parse(data)
 
 symboltable.mGlobal(0)
 
-if not error:
-    symboltable.printSymbolTablez()
+#if not error:
+#    symboltable.printSymbolTablez()
