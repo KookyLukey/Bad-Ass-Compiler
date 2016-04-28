@@ -3,7 +3,7 @@ import fileinput
 from queue import *
 import sys
 import symboltable
-import LinkedList
+from LinkedList import LinkedList
 from ply import yacc
 import traceback
 from pprint import pprint
@@ -120,8 +120,10 @@ while True:
     if not tok:
         break      # No more input
 
-counter = 1
-counter2 = 1
+# Global Variables
+ll = LinkedList()
+registerNum = 1
+labelNum = 1
 stack = []
 q = Queue(maxsize=0)
 
@@ -130,8 +132,13 @@ q = Queue(maxsize=0)
 print(";IR Code")
 
 def p_program(p):
-    'program : PROGRAM id BEGIN pgm_body END '
+    'program : PROGRAM id BEGIN pgm_body end'
 
+def p_end(p):
+    'end : END'
+    print(";RET")
+    ll.insert("RET", "", "", "")
+    print(";tiny code")
 
 def p_id(p):
     'id : IDENTIFIER'
@@ -213,7 +220,9 @@ def p_start_of_func(p):
     '''start_of_func : FUNCTION any_type id'''
     symboltable.mGlobal(p[3])
     print(";LABEL " + p[3])
+    ll.insert("LABEL", str(p[3]), "", "")
     print(";LINK")
+    ll.insert("LINK", "", "", "")
 
 def p_func_body(p):
     '''func_body : decl stmt_list '''
@@ -242,20 +251,28 @@ def p_assign_stmt(p):
 
 def p_assign_expr(p):
     '''assign_expr : id ASSIGN expr '''
-    if (p[3] is not None):
-        global counter
-        print(";STOREI " + str(p[3]) + " $T" + str(counter))
-        print(";STOREI $T" + str(counter) + " " + p[1])
-        counter = counter + 1
+    if (p[3][0] is None):
+        global registerNum
+        print(";STOREI " + str(p[3][1]) + " $T" + str(registerNum))
+        ll.insert("STOREI", str(p[3][1]), "$T" + str(registerNum), "")
+        print(";STOREI $T" + str(registerNum) + " " + p[1])
+        ll.insert("STOREI", "$T" + str(registerNum), p[1], "")
+        registerNum = registerNum + 1
+    if (p[3][0] is not None):
+        print(";STOREI $T" + str(p[3][2]) + " " + str(p[3][0]))
+        ll.insert("STOREI", "$T" + str(p[3][2]), str(p[3][0]), "")
 
 def p_read_stmt(p):
     '''read_stmt : READ LPAREN id_list RPAREN SEMICOLON '''
     print(";READ " + p[3][0])
+    ll.insert("READ", str(p[3][0]), "", "")
 
 def p_write_stmt(p):
     '''write_stmt : WRITE LPAREN id_list RPAREN SEMICOLON '''
     print(";WRITEI " + p[3][0])
+    ll.insert("WRITEI", str(p[3][0]), "", "")
     print(";WRITES " + p[3][1])
+    ll.insert("WRITES", str(p[3][1]), "", "")
 
 def p_return_stmt(p):
     '''return_stmt : RETURN expr SEMICOLON '''
@@ -264,13 +281,26 @@ def p_return_stmt(p):
 
 def p_expr(p):
     '''expr : expr_prefix factor '''
-    p[0] = p[2]
+    global registerNum
+    if (p[1] is not None):
+        print(";STOREI " + str(p[2]) + " $T" + str(registerNum))
+        ll.insert("STOREI", str(p[2]), "$T" + str(registerNum), "")
+        temp = registerNum + 1
+        print(";ADDI " + p[1] + " $T" + str(registerNum) + " $T" + str(temp))
+        ll.insert("ADDI", str(p[1]), "$T" + str(registerNum), "$T" + str(temp))
+        registerNum = registerNum + 2
+        p[0] = [p[1],p[2],temp]
+    else:
+        p[0] = [p[1],p[2]]
 
 def p_expr_prefix(p):
     '''expr_prefix : expr_prefix factor addop
     | empty'''
     if len(p) == 4:
         p[0] = p[2]
+
+
+#        print(p[3])
     else:
         p[0] = p[1]
 
@@ -309,25 +339,20 @@ def p_primary(p):
 
 def p_int_literal(p):
     '''int_literal : INTLITERAL'''
-    global counter
     p[0] = p[1]
 
 def p_float_literal(p):
     '''float_literal : FLOATLITERAL'''
-    print(str(p[1]))
     p[0] = p[1]
 
 def p_addop(p):
     '''addop : PLUS
     | MINUS '''
-    print(";ADDI")
     p[0] = p[1]
 
 def p_mulop (p):
     '''mulop : MULTIPLY
     | DIVIDE '''
-    print(";MULTI")
-    p[0] = p[1]
 
 # Complex Statements and conditions
 
@@ -341,49 +366,58 @@ def p_start_if(p):
 
 def p_end_if(p):
     '''end_if : ENDIF'''
-    global counter2
-    print(";LABEL label" + str(stack.pop()))
-    counter2 = counter2 + 1
+    global labelNum
+    temp = stack.pop()
+    print(";LABEL label" + str(temp))
+    ll.insert("LABEL", "label" + str(temp), "", "")
+    labelNum = labelNum + 1
 
 def p_else_part(p):
     '''else_part : start_else decl stmt_list
     | empty'''
-    global counter2
+    global labelNum
     if len(p) > 3:
         symboltable.block(0)
 #        print(";LABEL label" + str(stack.pop()))
-#        counter2 = counter2 + 1
+#        labelNum = labelNum + 1
 
 def p_start_else(p):
     '''start_else : ELSE'''
-    global counter2
+    global labelNum
     symboltable.block(1)
-    print(";JUMP label"+ str(counter2))
-    print(";LABEL label" + str(stack.pop()))
-    stack.append(counter2)
+    print(";JUMP label"+ str(labelNum))
+    ll.insert("JUMP", "label" + str(labelNum), "", "")
+    temp = stack.pop()
+    print(";LABEL label" + str(temp))
+    ll.insert("LABEL", "label" + str(temp), "", "")
+    stack.append(labelNum)
 #    print(";LABEL label" + str(queue))
-    counter2 = counter2 + 1
+    labelNum = labelNum + 1
 
 def p_cond(p):
     '''cond : expr compop expr'''
-    global counter2
-    global counter
-    print(";STOREI " + str(p[3]) + " $T" + str(counter))
+    global labelNum
+    global registerNum
+    print(";STOREI " + str(p[3][1]) + " $T" + str(registerNum))
+    ll.insert("STOREI", str(p[3][1]), "$T" + str(registerNum), "")
     if (p[2] == '!='):
-        print(";EQI " + str(p[1]) + " $T" + str(counter) + " label" + str(counter2))
-        q.put(counter2)
-        stack.append(counter2)
-        counter = counter + 1
-        counter2 = counter2 + 1
+        print(";EQI " + str(p[1][1]) + " $T" + str(registerNum) + " label" + str(labelNum))
+        ll.insert("EQI", str(p[1][1]), "$T" + str(registerNum), "label" + str(labelNum))
+        q.put(labelNum)
+        stack.append(labelNum)
+        registerNum = registerNum + 1
+        labelNum = labelNum + 1
     if (p[2] == '>'):
-        print(";LEI " + str(p[1]) + " $T" + str(counter) + " label" + str(counter2))
-        q.put(counter2)
-        stack.append(counter2)
-        counter2 = counter2 + 1
+        print(";LEI " + str(p[1][1]) + " $T" + str(registerNum) + " label" + str(labelNum))
+        ll.insert("LEI", str(p[1][1]), "$T" + str(registerNum), "label" + str(labelNum))
+        q.put(labelNum)
+        stack.append(labelNum)
+        registerNum = registerNum + 1
+        labelNum = labelNum + 1
 
 def p_compop(p):
     '''compop : COMPOP '''
-    global counter2
+    global labelNum
     p[0] = p[1]
     if (p[1] == '='):
         print(";NEI")
@@ -394,7 +428,7 @@ def p_compop(p):
     if (p[1] == '>='):
         print(";LTI")
     if (p[1] == '>'):
-#        print(";LEI label" + str(counter2))
+#        print(";LEI label" + str(labelNum))
         p[0] = p[1]
     else:
         p[0] = p[1]
@@ -406,20 +440,25 @@ def p_while_stmt(p):
 
 def p_start_while(p):
     '''start_while : WHILE'''
-    global counter2
+    global labelNum
     symboltable.block(1)
-    print(";LABEL label" + str(counter2))
-    q.put(counter2)
-    stack.append("label" + str(counter2))
-    counter2 = counter2 + 1
+    print(";LABEL label" + str(labelNum))
+    ll.insert("LABEL", "label" + str(labelNum), "", "")
+    q.put(labelNum)
+    stack.append("label" + str(labelNum))
+    labelNum = labelNum + 1
 
 def p_end_while(p):
     '''end_while : ENDWHILE'''
     symboltable.block(0)
-    print(";JUMP label" + str(q.get()))
-    global counter2
-    counter2 = counter2 + 1
-    print(";LABEL label" + str(q.get()))
+    temp = q.get()
+    print(";JUMP label" + str(temp))
+    ll.insert("JUMP", "label" + str(temp), "", "")
+    global labelNum
+    labelNum = labelNum + 1
+    temp = q.get()
+    print(";LABEL label" + str(temp))
+    ll.insert("LABEL", "label" + str(temp), "", "")
 
 def p_empty(p):
     'empty :'
