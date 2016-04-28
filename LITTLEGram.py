@@ -1,5 +1,6 @@
 from ply import lex
 import fileinput
+from queue import *
 import sys
 import symboltable
 import LinkedList
@@ -121,6 +122,9 @@ while True:
 
 counter = 1
 counter2 = 1
+stack = []
+q = Queue(maxsize=0)
+
 # Program
 
 print(";IR Code")
@@ -240,7 +244,7 @@ def p_assign_expr(p):
     '''assign_expr : id ASSIGN expr '''
     if (p[3] is not None):
         global counter
-        print(";STOREI " + p[3] + " $T" + str(counter))
+        print(";STOREI " + str(p[3]) + " $T" + str(counter))
         print(";STOREI $T" + str(counter) + " " + p[1])
         counter = counter + 1
 
@@ -297,10 +301,21 @@ def p_expr_list_tail(p):
 def p_primary(p):
     '''primary : LPAREN expr RPAREN
     | id
-    | INTLITERAL
-    | FLOATLITERAL'''
+    | int_literal
+    | float_literal'''
     if len(p) == 2:
         p[0] = p[1]
+#        print(str(p[1]))
+
+def p_int_literal(p):
+    '''int_literal : INTLITERAL'''
+    global counter
+    p[0] = p[1]
+
+def p_float_literal(p):
+    '''float_literal : FLOATLITERAL'''
+    print(str(p[1]))
+    p[0] = p[1]
 
 def p_addop(p):
     '''addop : PLUS
@@ -317,33 +332,59 @@ def p_mulop (p):
 # Complex Statements and conditions
 
 def p_if_stmt(p):
-    '''if_stmt : start_if LPAREN cond RPAREN decl stmt_list else_part ENDIF '''
-    global counter2
+    '''if_stmt : start_if LPAREN cond RPAREN decl stmt_list else_part end_if'''
     symboltable.block(0)
-    print(";LABEL label" + str(counter2))
-    counter2 = counter2 + 1
 
 def p_start_if(p):
     '''start_if : IF'''
     symboltable.block(1)
 
+def p_end_if(p):
+    '''end_if : ENDIF'''
+    global counter2
+    print(";LABEL label" + str(stack.pop()))
+    counter2 = counter2 + 1
+
 def p_else_part(p):
     '''else_part : start_else decl stmt_list
     | empty'''
+    global counter2
     if len(p) > 3:
         symboltable.block(0)
+#        print(";LABEL label" + str(stack.pop()))
+#        counter2 = counter2 + 1
 
 def p_start_else(p):
     '''start_else : ELSE'''
+    global counter2
     symboltable.block(1)
+    print(";JUMP label"+ str(counter2))
+    print(";LABEL label" + str(stack.pop()))
+    stack.append(counter2)
+#    print(";LABEL label" + str(queue))
+    counter2 = counter2 + 1
 
 def p_cond(p):
     '''cond : expr compop expr'''
+    global counter2
+    global counter
+    print(";STOREI " + str(p[3]) + " $T" + str(counter))
+    if (p[2] == '!='):
+        print(";EQI " + str(p[1]) + " $T" + str(counter) + " label" + str(counter2))
+        q.put(counter2)
+        stack.append(counter2)
+        counter = counter + 1
+        counter2 = counter2 + 1
+    if (p[2] == '>'):
+        print(";LEI " + str(p[1]) + " $T" + str(counter) + " label" + str(counter2))
+        q.put(counter2)
+        stack.append(counter2)
+        counter2 = counter2 + 1
 
 def p_compop(p):
     '''compop : COMPOP '''
-    if (p[1] == '!='):
-        print(";EQI")
+    global counter2
+    p[0] = p[1]
     if (p[1] == '='):
         print(";NEI")
     if (p[1] == '<='):
@@ -353,7 +394,10 @@ def p_compop(p):
     if (p[1] == '>='):
         print(";LTI")
     if (p[1] == '>'):
-        print(";LEI")
+#        print(";LEI label" + str(counter2))
+        p[0] = p[1]
+    else:
+        p[0] = p[1]
 
 # While Statements
 
@@ -365,11 +409,17 @@ def p_start_while(p):
     global counter2
     symboltable.block(1)
     print(";LABEL label" + str(counter2))
+    q.put(counter2)
+    stack.append("label" + str(counter2))
     counter2 = counter2 + 1
 
 def p_end_while(p):
     '''end_while : ENDWHILE'''
     symboltable.block(0)
+    print(";JUMP label" + str(q.get()))
+    global counter2
+    counter2 = counter2 + 1
+    print(";LABEL label" + str(q.get()))
 
 def p_empty(p):
     'empty :'
@@ -387,7 +437,7 @@ symboltable.mGlobal("GLOBAL")
 
 parser.parse(data)
 
-symboltable.mGlobal(0)
+#symboltable.mGlobal(0)
 
 #if not error:
-#    symboltable.printSymbolTablez()
+#    symboltable.printSymbolTable()

@@ -10,6 +10,8 @@ def decl(name,type,value):
     if (value):
         pushToTable(name, "STRING", symbolTableInUse,value)
         mainGlobal.append("name " + name + " type STRING value " + value)
+#    if (type(value) is int):
+#        pushToTable(name, type, symbolTableInUse, value)
     else:
         pushToTable(name, type, symbolTableInUse, 0)
         mainGlobal.append("name " + name + " type " + type)
@@ -23,8 +25,8 @@ def mGlobal(name):
         if symbolTableInUse != "GLOBAL":
             mainGlobal.append("")
         mainGlobal.append("Symbol table " + symbolTableInUse)
-    else:
-        symbolTable.pop(stack.pop())
+#    else:
+#        symbolTable.pop(stack.pop())
 
 def block(num):
     if(num == 1):
@@ -37,8 +39,8 @@ def block(num):
         symbolTable[symbolTableInUse] = {}
         mainGlobal.append("")
         mainGlobal.append("Symbol table " + symbolTableInUse)
-    else:
-        symbolTable.pop(stack.pop())
+#    else:
+#        symbolTable.pop(stack.pop())
 
 def pushToTable(name,type,scope,value):
     global err
@@ -54,6 +56,15 @@ def pushToTable(name,type,scope,value):
                 "value": value
             }
         }
+
+def printSymbolTable():
+    if err:
+        pass
+    else:
+        for key in symbolTable:
+            for keys in symbolTable[key]:
+                print("Scope: %s, Name: %s, Value: %s" % (key, keys, symbolTable[key][keys]))
+
 
 def printSymbolTablez():
     if err:
