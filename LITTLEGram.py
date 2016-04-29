@@ -126,6 +126,7 @@ ll = LinkedList()
 registerNum = 1
 labelNum = 1
 stack = []
+expression = []
 q = Queue(maxsize=0)
 
 # Program
@@ -267,7 +268,9 @@ def p_assign_expr(p):
             ll.insert("STOREF", "$T" + str(registerNum), p[1], "")
             registerNum = registerNum + 1
     if (p[3][0] is not None):
-        if (symboltable.checkType(p[3][1]) == 'INT' or "." not in p[3][1]):
+        if ("$T" in p[3][0]):
+            print(";STOREI $T" + str(p[3][2]) + " " + str(p[1]))
+        elif (symboltable.checkType(p[3][1]) == 'INT' or "." not in p[3][1]):
             print(";STOREI $T" + str(p[3][2]) + " " + str(p[3][0]))
             ll.insert("STOREI", "$T" + str(p[3][2]), str(p[3][0]), "")
         else:
@@ -276,8 +279,9 @@ def p_assign_expr(p):
 
 def p_read_stmt(p):
     '''read_stmt : READ LPAREN id_list RPAREN SEMICOLON '''
-    print(";READI " + p[3][0])
-    ll.insert("READI", str(p[3][0]), "", "")
+    for i in p[3]:
+        print(";READI " + str(i))
+        ll.insert("READI", str(i), "", "")
 
 def p_write_stmt(p):
     '''write_stmt : WRITE LPAREN id_list RPAREN SEMICOLON '''
@@ -302,7 +306,7 @@ def p_expr(p):
     global registerNum
     if (p[1] is not None):
         temp = registerNum
-        if (symboltable.checkType(p[2]) is None):
+        if ("$T" not in p[2] and symboltable.checkType(p[2]) is None):
             print(";STOREI " + str(p[2]) + " $T" + str(registerNum))
             ll.insert("STOREI", str(p[2]), "$T" + str(registerNum), "")
             temp = registerNum + 1
@@ -314,7 +318,7 @@ def p_expr(p):
                 print(";SUBI " + p[1][0] + " $T" + str(registerNum) + " $T" + str(temp))
                 ll.insert("SUBI", str(p[1][0]), "$T" + str(registerNum), "$T" + str(temp))
                 registerNum = registerNum + 2
-        else:
+        elif ("$T" in p[1][0] or "$T" in p[2]):
             if (p[1][1] == '+'):
                 print(";ADDI " + p[1][0] + " " + str(p[2]) + " $T" + str(temp))
                 ll.insert("ADDI", str(p[1][0]), str(p[2]), "$T" + str(temp))
@@ -332,16 +336,25 @@ def p_expr_prefix(p):
     | empty'''
     if len(p) == 4:
         p[0] = [p[2],p[3]]
+        expression.append(p[2])
     else:
         p[0] = p[1]
 
 def p_factor(p):
     '''factor : factor_prefix postfix_expr '''
     p[0] = p[2]
+    global registerNum
+    if (p[1] is not None and p[1][1] == '*'):
+        print(";MUTLI " + p[1][0] + " " + p[2] + " $T" + str(registerNum))
+        tempReg = "$T"+str(registerNum)
+        registerNum = registerNum + 1
+        p[0] = tempReg
 
 def p_factor_prefix(p):
     '''factor_prefix : factor_prefix postfix_expr mulop
     | empty'''
+    if (len(p) > 2):
+        p[0] = [p[2],p[3]]
 
 def p_postfix_expr(p):
     '''postfix_expr : primary
