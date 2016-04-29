@@ -136,6 +136,44 @@ class irConverter(object):
                     node.set_result("r"+str(temp))
                     print("move " + node.get_op1() + " " + node.get_result())
                     print("subi " + node.get_op2() + " " + node.get_result())
+
+                if (node.get_instr() == 'MULTI' and '$T' in node.get_op1() and '$T' in node.get_op2()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("multi " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'MULTI' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("multi " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'MULTI' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op2() + " " + node.get_result())
+                    print("multi " + node.get_op1() + " " + node.get_result())
+                elif (node.get_instr() == 'MULTI'):
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("multi " + node.get_op2() + " " + node.get_result())
+
                 if (node.get_instr() == 'RET'):
                     print("sys halt")
                 node = node.get_next()

@@ -1,7 +1,7 @@
 from ply import lex
 import fileinput
 from irConverter import irConverter
-from queue import *
+from Queue import Queue
 import sys
 import symboltable
 from LinkedList import LinkedList
@@ -346,6 +346,7 @@ def p_factor(p):
     global registerNum
     if (p[1] is not None and p[1][1] == '*'):
         print(";MUTLI " + p[1][0] + " " + p[2] + " $T" + str(registerNum))
+        ll.insert("MULTI", str(p[1][0]), str(p[2]), str(registerNum))
         tempReg = "$T"+str(registerNum)
         registerNum = registerNum + 1
         p[0] = tempReg
