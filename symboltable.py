@@ -57,6 +57,20 @@ def pushToTable(name,type,scope,value):
             }
         }
 
+def checkType(name):
+    if (name in symbolTable['GLOBAL'].keys()):
+        for i,j in symbolTable['GLOBAL'][name].items():
+                if (j['type'] == 'INT'):
+                    return 'INT'
+                elif (j['type'] == 'STRING'):
+                    return 'STRING'
+                elif (j['type'] == 'FLOAT'):
+                    return 'FLOAT'
+                else:
+                    return None
+    else:
+        return None
+
 def printSymbolTable():
     if err:
         pass

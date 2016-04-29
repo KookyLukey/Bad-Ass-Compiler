@@ -44,3 +44,6 @@ class LinkedList(object):
         while current is not None:
             print(current.get_instr() + " " +  current.get_op1() + " " + current.get_op2() + " " +  current.get_result())
             current = current.get_next()
+
+    def returnStart(self):
+        return self.start

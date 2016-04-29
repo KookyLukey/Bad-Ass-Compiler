@@ -1,5 +1,6 @@
 from ply import lex
 import fileinput
+from irConverter import irConverter
 from queue import *
 import sys
 import symboltable
@@ -129,7 +130,7 @@ q = Queue(maxsize=0)
 
 # Program
 
-print(";IR Code")
+print(";IR code")
 
 def p_program(p):
     'program : PROGRAM id BEGIN pgm_body end'
@@ -251,28 +252,45 @@ def p_assign_stmt(p):
 
 def p_assign_expr(p):
     '''assign_expr : id ASSIGN expr '''
+    global registerNum
     if (p[3][0] is None):
-        global registerNum
-        print(";STOREI " + str(p[3][1]) + " $T" + str(registerNum))
-        ll.insert("STOREI", str(p[3][1]), "$T" + str(registerNum), "")
-        print(";STOREI $T" + str(registerNum) + " " + p[1])
-        ll.insert("STOREI", "$T" + str(registerNum), p[1], "")
-        registerNum = registerNum + 1
+        if (symboltable.checkType(p[3][1]) == 'INT' or "." not in p[3][1]):
+            print(";STOREI " + str(p[3][1]) + " $T" + str(registerNum))
+            ll.insert("STOREI", str(p[3][1]), "$T" + str(registerNum), "")
+            print(";STOREI $T" + str(registerNum) + " " + p[1])
+            ll.insert("STOREI", "$T" + str(registerNum), p[1], "")
+            registerNum = registerNum + 1
+        elif (symboltable.checkType(p[3][1]) == 'FLOAT'):
+            print(";STOREF " + str(p[3][1]) + " $T" + str(registerNum))
+            ll.insert("STOREF", str(p[3][1]), "$T" + str(registerNum), "")
+            print(";STOREF $T" + str(registerNum) + " " + p[1])
+            ll.insert("STOREF", "$T" + str(registerNum), p[1], "")
+            registerNum = registerNum + 1
     if (p[3][0] is not None):
-        print(";STOREI $T" + str(p[3][2]) + " " + str(p[3][0]))
-        ll.insert("STOREI", "$T" + str(p[3][2]), str(p[3][0]), "")
+        if (symboltable.checkType(p[3][1]) == 'INT' or "." not in p[3][1]):
+            print(";STOREI $T" + str(p[3][2]) + " " + str(p[3][0]))
+            ll.insert("STOREI", "$T" + str(p[3][2]), str(p[3][0]), "")
+        else:
+            print(";STOREF $T" + str(p[3][2]) + " " + str(p[3][0]))
+            ll.insert("STOREF", "$T" + str(p[3][2]), str(p[3][0]), "")
 
 def p_read_stmt(p):
     '''read_stmt : READ LPAREN id_list RPAREN SEMICOLON '''
-    print(";READ " + p[3][0])
-    ll.insert("READ", str(p[3][0]), "", "")
+    print(";READI " + p[3][0])
+    ll.insert("READI", str(p[3][0]), "", "")
 
 def p_write_stmt(p):
     '''write_stmt : WRITE LPAREN id_list RPAREN SEMICOLON '''
-    print(";WRITEI " + p[3][0])
-    ll.insert("WRITEI", str(p[3][0]), "", "")
-    print(";WRITES " + p[3][1])
-    ll.insert("WRITES", str(p[3][1]), "", "")
+    for i in p[3]:
+        if (symboltable.checkType(i) == 'INT'):
+            print(";WRITEI " + i)
+            ll.insert("WRITEI", i, "", "")
+        elif (symboltable.checkType(i) == 'STRING'):
+            print(";WRITES " + i)
+            ll.insert("WRITES", i, "", "")
+        else:
+            print(";WRITEF " + i)
+            ll.insert("WRITEF", i, "", "")
 
 def p_return_stmt(p):
     '''return_stmt : RETURN expr SEMICOLON '''
@@ -283,13 +301,29 @@ def p_expr(p):
     '''expr : expr_prefix factor '''
     global registerNum
     if (p[1] is not None):
-        print(";STOREI " + str(p[2]) + " $T" + str(registerNum))
-        ll.insert("STOREI", str(p[2]), "$T" + str(registerNum), "")
-        temp = registerNum + 1
-        print(";ADDI " + p[1] + " $T" + str(registerNum) + " $T" + str(temp))
-        ll.insert("ADDI", str(p[1]), "$T" + str(registerNum), "$T" + str(temp))
-        registerNum = registerNum + 2
-        p[0] = [p[1],p[2],temp]
+        temp = registerNum
+        if (symboltable.checkType(p[2]) is None):
+            print(";STOREI " + str(p[2]) + " $T" + str(registerNum))
+            ll.insert("STOREI", str(p[2]), "$T" + str(registerNum), "")
+            temp = registerNum + 1
+            if (p[1][1] == '+'):
+                print(";ADDI " + p[1][0] + " $T" + str(registerNum) + " $T" + str(temp))
+                ll.insert("ADDI", str(p[1][0]), "$T" + str(registerNum), "$T" + str(temp))
+                registerNum = registerNum + 2
+            elif(p[1][1] == '-'):
+                print(";SUBI " + p[1][0] + " $T" + str(registerNum) + " $T" + str(temp))
+                ll.insert("SUBI", str(p[1][0]), "$T" + str(registerNum), "$T" + str(temp))
+                registerNum = registerNum + 2
+        else:
+            if (p[1][1] == '+'):
+                print(";ADDI " + p[1][0] + " " + str(p[2]) + " $T" + str(temp))
+                ll.insert("ADDI", str(p[1][0]), str(p[2]), "$T" + str(temp))
+                registerNum = registerNum + 1
+            elif(p[1][1] == '-'):
+                print(";SUBI " + p[1][0] + " " + str(p[2]) + " $T" + str(temp))
+                ll.insert("SUBI", str(p[1][0]), str(p[2]), "$T" + str(temp))
+                registerNum = registerNum + 2
+        p[0] = [p[1][0],p[2],temp]
     else:
         p[0] = [p[1],p[2]]
 
@@ -297,10 +331,7 @@ def p_expr_prefix(p):
     '''expr_prefix : expr_prefix factor addop
     | empty'''
     if len(p) == 4:
-        p[0] = p[2]
-
-
-#        print(p[3])
+        p[0] = [p[2],p[3]]
     else:
         p[0] = p[1]
 
@@ -353,6 +384,7 @@ def p_addop(p):
 def p_mulop (p):
     '''mulop : MULTIPLY
     | DIVIDE '''
+    p[0] = p[1]
 
 # Complex Statements and conditions
 
@@ -368,9 +400,9 @@ def p_end_if(p):
     '''end_if : ENDIF'''
     global labelNum
     temp = stack.pop()
+#    print("---"+str(labelNum))
     print(";LABEL label" + str(temp))
     ll.insert("LABEL", "label" + str(temp), "", "")
-    labelNum = labelNum + 1
 
 def p_else_part(p):
     '''else_part : start_else decl stmt_list
@@ -385,6 +417,7 @@ def p_start_else(p):
     '''start_else : ELSE'''
     global labelNum
     symboltable.block(1)
+#    print(labelNum)
     print(";JUMP label"+ str(labelNum))
     ll.insert("JUMP", "label" + str(labelNum), "", "")
     temp = stack.pop()
@@ -400,6 +433,7 @@ def p_cond(p):
     global registerNum
     print(";STOREI " + str(p[3][1]) + " $T" + str(registerNum))
     ll.insert("STOREI", str(p[3][1]), "$T" + str(registerNum), "")
+#    print(labelNum)
     if (p[2] == '!='):
         print(";EQI " + str(p[1][1]) + " $T" + str(registerNum) + " label" + str(labelNum))
         ll.insert("EQI", str(p[1][1]), "$T" + str(registerNum), "label" + str(labelNum))
@@ -414,6 +448,13 @@ def p_cond(p):
         stack.append(labelNum)
         registerNum = registerNum + 1
         labelNum = labelNum + 1
+    if (p[2] == '<'):
+        print(";GEI " + str(p[1][1]) + " $T" + str(registerNum) + " label" + str(labelNum))
+        ll.insert("GEI", str(p[1][1]), "$T" + str(registerNum), "label" + str(labelNum))
+        q.put(labelNum)
+        stack.append(labelNum)
+        registerNum = registerNum + 1
+        labelNum = labelNum + 1
 
 def p_compop(p):
     '''compop : COMPOP '''
@@ -424,7 +465,7 @@ def p_compop(p):
     if (p[1] == '<='):
         print(";GTI")
     if (p[1] == '<'):
-        print(";GEI")
+        p[0] = p[1]
     if (p[1] == '>='):
         print(";LTI")
     if (p[1] == '>'):
@@ -475,6 +516,20 @@ parser = yacc.yacc()
 symboltable.mGlobal("GLOBAL")
 
 parser.parse(data)
+
+ir = irConverter(ll)
+
+for i in symboltable.symbolTable['GLOBAL'].keys():
+    for j,k in symboltable.symbolTable['GLOBAL'][i].items():
+        if (k['type'] == 'INT'):
+            print("var " + k['name'])
+
+for i in symboltable.symbolTable['GLOBAL'].keys():
+    for j,k in symboltable.symbolTable['GLOBAL'][i].items():
+        if (k['type'] == 'STRING'):
+            print("str " + k['name'] + " " + k['value'])
+
+ir.tinyBuilder()
 
 #symboltable.mGlobal(0)
 

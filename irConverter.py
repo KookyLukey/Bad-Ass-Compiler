@@ -1,37 +1,144 @@
 import sys
-import Node
+import re
+from Node import Node
+from LinkedList import LinkedList
 
-def openf(file):
-    irList = []
-    with open(file) as f:
-        lines = f.readlines()
-        temp = lines.split()
-        node = buildIr(temp)
-        if node is not None:
-            irList.append(node)
+class irConverter(object):
 
-    return irList
+    def __init__(self, ll = None):
+        self.ll = ll
 
-def buildIr(list):
-    if list[0] != "LABEL" && list[0] != "LINK":
-        instr = list[0]
+    def printList(self):
+        print(self.ll.returnString(0).get_instr())
 
-        try:
-            op1 = list[1]
-        except IndexError:
-            op1 = ""
+    def tinyBuilder(self):
+        node = self.ll.returnStart()
+        while(node is not None):
+            if (node.get_instr() != 'LINK'):
 
-        try:
-            op2 = list[2]
-        except IndexError:
-            op2 = ""
+                if (node.get_instr() == 'STOREI'):
 
-        try:
-            result = list[3]
-        except IndexError:
-            result = ""
+                    if ("$T" in node.get_op1()):
+                        node.set_op1("r" + str(int(node.get_op1()[2:])-1))
 
-    else:
-        pass
+                    if ("$T" in node.get_op2()):
+                        temp = node.get_op2().lstrip('$T')
+                        temp = int(temp) - 1
+                        node.set_op2("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_op2())
 
-    return Node.IRN(instr, op1, op2, result)
+                if (node.get_instr() == 'LABEL'):
+                    print("label " + node.get_op1())
+
+                if (node.get_instr() == 'JUMP'):
+                    print("jmp " + node.get_op1())
+
+                if (node.get_instr() == 'READI'):
+                    print("sys readi " + node.get_op1())
+
+                if (node.get_instr() == 'WRITEI'):
+                    print("sys writei " + node.get_op1())
+
+                if (node.get_instr() == 'WRITES'):
+                    print("sys writes " + node.get_op1())
+
+                if (node.get_instr() == 'EQI'):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jeq " + node.get_result())
+
+                if (node.get_instr() == 'LEI'):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jle " + node.get_result())
+
+                if (node.get_instr() == 'GEI'):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jge " + node.get_result())
+
+                if (node.get_instr() == 'ADDI' and '$T' in node.get_op1() and '$T' in node.get_op2()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addi " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'ADDI' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addi " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'ADDI' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addi " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'ADDI'):
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addi " + node.get_op2() + " " + node.get_result())
+
+                if (node.get_instr() == 'SUBI' and '$T' in node.get_op1() and '$T' in node.get_op2()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subi " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'SUBI' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subi " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'SUBI' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op2() + " " + node.get_result())
+                    print("subi " + node.get_op1() + " " + node.get_result())
+                elif (node.get_instr() == 'SUBI'):
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subi " + node.get_op2() + " " + node.get_result())
+                if (node.get_instr() == 'RET'):
+                    print("sys halt")
+                node = node.get_next()
+            else:
+                node = node.get_next()
+                pass
