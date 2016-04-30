@@ -1,6 +1,6 @@
 ;IR code
 ;LABEL main
-;LINK 
+;LINK
 ;STOREI 1 $T1
 ;STOREI $T1 a
 ;STOREI 2 $T2
@@ -212,11 +212,11 @@ move 2.0 r28
 move r28 y
 move 3.14159 r29
 move r29 z
-sys writer x 
+sys writer x
 sys writes newline
-sys writer z 
+sys writer z
 sys writes newline
-sys writer y 
+sys writer y
 sys writes newline
 move 2.0 r30
 move z r31
@@ -225,9 +225,9 @@ move r31 x
 move z r32
 divr y r32
 move r32 y
-sys writer x 
+sys writer x
 sys writes newline
-sys writer y 
+sys writer y
 sys writes newline
 move x r33
 addr y r33
@@ -236,12 +236,12 @@ addr z r34
 move r34 r35
 divr z r35
 move r35 t
-sys writer t 
+sys writer t
 sys writes newline
 move t r36
 mulr t r36
 move r36 t
-sys writer t 
+sys writer t
 sys writes newline
 move 2.0 r37
 move t r38
@@ -273,6 +273,6 @@ addr r44 r52
 move r52 r53
 addr r46 r53
 move r53 t
-sys writer t 
+sys writer t
 sys writes newline
 sys halt

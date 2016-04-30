@@ -255,13 +255,15 @@ def p_assign_expr(p):
     '''assign_expr : id ASSIGN expr '''
     global registerNum
     if (p[3][0] is None):
-        if (symboltable.checkType(p[3][1]) == 'INT' or "." not in p[3][1]):
+        if ((symboltable.checkType(p[3][1]) != 'FLOAT' and symboltable.checkType(p[3][1]) != 'STRING') and "." not in p[3][1]):
             print(";STOREI " + str(p[3][1]) + " $T" + str(registerNum))
             ll.insert("STOREI", str(p[3][1]), "$T" + str(registerNum), "")
             print(";STOREI $T" + str(registerNum) + " " + p[1])
             ll.insert("STOREI", "$T" + str(registerNum), p[1], "")
             registerNum = registerNum + 1
-        elif (symboltable.checkType(p[3][1]) == 'FLOAT'):
+        elif (symboltable.checkType(p[3][1]) == 'FLOAT' and symboltable.checkType(p[1]) == 'FLOAT'):
+            print(";STOREF " + str(p[3][1]) + " " + p[1])
+        elif (symboltable.checkType(p[3][1]) == 'FLOAT' or "." in p[3][1]):
             print(";STOREF " + str(p[3][1]) + " $T" + str(registerNum))
             ll.insert("STOREF", str(p[3][1]), "$T" + str(registerNum), "")
             print(";STOREF $T" + str(registerNum) + " " + p[1])
@@ -304,6 +306,7 @@ def p_return_stmt(p):
 def p_expr(p):
     '''expr : expr_prefix factor '''
     global registerNum
+    print(str(p[0]) + " " + str(p[1]))
     if (p[1] is not None):
         temp = registerNum
         if ("$T" not in p[2] and symboltable.checkType(p[2]) is None):
@@ -319,6 +322,15 @@ def p_expr(p):
                 ll.insert("SUBI", str(p[1][0]), "$T" + str(registerNum), "$T" + str(temp))
                 registerNum = registerNum + 2
         elif ("$T" in p[1][0] or "$T" in p[2]):
+            if (p[1][1] == '+'):
+                print(";ADDI " + p[1][0] + " " + str(p[2]) + " $T" + str(temp))
+                ll.insert("ADDI", str(p[1][0]), str(p[2]), "$T" + str(temp))
+                registerNum = registerNum + 1
+            elif(p[1][1] == '-'):
+                print(";SUBI " + p[1][0] + " " + str(p[2]) + " $T" + str(temp))
+                ll.insert("SUBI", str(p[1][0]), str(p[2]), "$T" + str(temp))
+                registerNum = registerNum + 2
+        elif ("$T" not in p[1][0] or "$T" not in p[2]):
             if (p[1][1] == '+'):
                 print(";ADDI " + p[1][0] + " " + str(p[2]) + " $T" + str(temp))
                 ll.insert("ADDI", str(p[1][0]), str(p[2]), "$T" + str(temp))
@@ -356,6 +368,7 @@ def p_factor_prefix(p):
     | empty'''
     if (len(p) > 2):
         p[0] = [p[2],p[3]]
+        print(p[0])
 
 def p_postfix_expr(p):
     '''postfix_expr : primary

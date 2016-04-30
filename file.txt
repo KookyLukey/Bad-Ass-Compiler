@@ -1,0 +1,23 @@
+;IR code
+;LABEL main
+;LINK
+None None
+;STOREF 7.0 $T1
+;STOREF $T1 num
+None None
+;STOREI 100 $T2
+;STOREI $T2 i
+None None
+;STOREI 1 $T3
+;STOREI $T3 j
+None None
+;STOREF num approx
+;LABEL label1
+None None
+None None
+;STOREI 0 $T4
+;EQI i $T4 label2
+['0.5', '*']
+['num', '/']
+None ['approx', '+']
+;ADDI approx approx $T5
