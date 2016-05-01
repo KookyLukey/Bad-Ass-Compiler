@@ -532,12 +532,14 @@ def irExpBuilder(expression):
             print(";STOREF " + str(temp[i]) + " $T" + str(registerNum))
 #                regDictionary['i'] = "$T" + registerNum
             temp[i] = "$T" + str(registerNum)
+            typeExp = "F"
             registerNum = registerNum + 1
             i = 0
         elif (typeI(temp[i])):
             print(";STOREI " + str(temp[i]) + " $T" + str(registerNum))
 #                regDictionary['i'] = "$T" + registerNum
             temp[i] = "$T" + str(registerNum)
+            typeExp = "I"
             registerNum = registerNum + 1
             i = 0
         elif ('(' in temp[i]):
@@ -562,7 +564,7 @@ def irExpBuilder(expression):
         else:
             i = i + 1
 
-    print(";STOREF " + temp[2] + " " + temp[0])
+    print(";STORE" + typeExp + " " + temp[2] + " " + temp[0])
 
 def innerExp(start, end, listor):
     global registerNum
@@ -572,6 +574,15 @@ def innerExp(start, end, listor):
     while iterator < end:
         if (ops[0] in listor[iterator]):
             if (symboltable.checkType(listor[iterator-1]) != 'INT' or symboltable.checkType(listor[iterator+1]) != 'INT'):
+                print(";MULTF " + listor[iterator-1] + " " + listor[iterator + 1] + " $T" + str(registerNum))
+                listor.insert(iterator-1, "$T" + str(registerNum))
+                listor.pop(iterator)
+                listor.pop(iterator)
+                listor.pop(iterator)
+                iterator = iterator + 1
+                registerNum = registerNum + 1
+                end = end - 2
+            elif (symboltable.checkType(listor[iterator-1]) != 'FLOAT' or symboltable.checkType(listor[iterator+1]) != 'FLOAT'):
                 print(";MULTF " + listor[iterator-1] + " " + listor[iterator + 1] + " $T" + str(registerNum))
                 listor.insert(iterator-1, "$T" + str(registerNum))
                 listor.pop(iterator)
@@ -595,6 +606,16 @@ def innerExp(start, end, listor):
                 registerNum = registerNum + 1
                 end = end - 2
                 iterator = start + 1
+            elif (symboltable.checkType(listor[iterator-1]) != 'FLOAT' or symboltable.checkType(listor[iterator+1]) != 'FLOAT'):
+                print(";DIVI " + listor[iterator-1] + " " + listor[iterator + 1] + " $T" + str(registerNum))
+                listor.insert(iterator-1, "$T" + str(registerNum))
+                listor.pop(iterator)
+                listor.pop(iterator)
+                listor.pop(iterator)
+                iterator = iterator + 1
+                registerNum = registerNum + 1
+                end = end - 2
+                iterator = start + 1
         else:
             iterator = iterator + 1
     iterator = start
@@ -609,6 +630,15 @@ def innerExp(start, end, listor):
                 iterator = iterator + 1
                 registerNum = registerNum + 1
                 end = end - 2
+            elif (symboltable.checkType(listor[iterator-1]) != 'FLOAT' or symboltable.checkType(listor[iterator+1]) != 'FLOAT'):
+                print(";ADDI " + listor[iterator-1] + " " + listor[iterator + 1] + " $T" + str(registerNum))
+                listor.insert(iterator-1, "$T" + str(registerNum))
+                listor.pop(iterator)
+                listor.pop(iterator)
+                listor.pop(iterator)
+                iterator = iterator + 1
+                registerNum = registerNum + 1
+                end = end - 2
         else:
             iterator = iterator + 1
     iterator = start
@@ -616,6 +646,15 @@ def innerExp(start, end, listor):
         if (ops[3] in listor[iterator]):
             if (symboltable.checkType(listor[iterator-1]) != 'INT' or symboltable.checkType(listor[iterator+1]) != 'INT'):
                 print(";SUBF " + listor[iterator-1] + " " + listor[iterator + 1] + " $T" + str(registerNum))
+                listor.insert(iterator-1, "$T" + str(registerNum))
+                listor.pop(iterator)
+                listor.pop(iterator)
+                listor.pop(iterator)
+                iterator = iterator + 1
+                registerNum = registerNum + 1
+                end = end - 2
+            if (symboltable.checkType(listor[iterator-1]) != 'FLOAT' or symboltable.checkType(listor[iterator+1]) != 'FLOAT'):
+                print(";SUBI " + listor[iterator-1] + " " + listor[iterator + 1] + " $T" + str(registerNum))
                 listor.insert(iterator-1, "$T" + str(registerNum))
                 listor.pop(iterator)
                 listor.pop(iterator)
