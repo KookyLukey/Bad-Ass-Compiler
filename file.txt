@@ -1,23 +1,9 @@
 ;IR code
-;LABEL main
-;LINK
-None None
-;STOREF 7.0 $T1
-;STOREF $T1 num
-None None
-;STOREI 100 $T2
-;STOREI $T2 i
-None None
-;STOREI 1 $T3
-;STOREI $T3 j
-None None
-;STOREF num approx
-;LABEL label1
-None None
-None None
-;STOREI 0 $T4
-;EQI i $T4 label2
-['0.5', '*']
-['num', '/']
-None ['approx', '+']
-;ADDI approx approx $T5
+;STOREF 0.5 $T1
+;DIVF num approx $T2
+;ADDF approx $T2 $T3
+;MULTF $T1 $T3 $T4
+;STOREF $T4 newapprox
+;STOREF 1 $T5
+;SUBF i $T5 $T6
+;STOREF $T6 i
