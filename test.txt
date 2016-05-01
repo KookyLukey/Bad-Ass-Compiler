@@ -1,0 +1,11 @@
+;IR code
+;STOREI 1 $T1
+;ADDI count $T1 $T2
+;STOREI $T2 count
+;STOREF 0.5 $T4
+;DIVF num approx $T5
+;ADDF approx $T5 $T6
+;MULTF $T4 $T6 $T8
+;STOREF $T8 newapprox
+;SUBF approx newapprox $T10
+;STORE $T10 diff
