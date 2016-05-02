@@ -3,7 +3,7 @@
 
 
 #Use the inputs to run through compiler with Micro. Recieve outputs.
-INPUTS=Step4/inputs/step4_testcase.micro
+INPUTS=Step4/inputs/*
 mkdir Step4/usertest
 mkdir Step4/usertest/inputs
 mkdir Step4/usertest/outputs
@@ -55,7 +55,7 @@ for file in $FINAL1
     while IFS= read -r line
     do
       pat="STATISTICS"
-      if $line =~ $pat; then
+      if [[ $line =~ $pat ]]; then
         break
       fi
       echo "$line" >> tempfile.txt
@@ -70,7 +70,7 @@ for file in $FINAL2
     while IFS= read -r line
     do
       pat="STATISTICS"
-      if  $line =~ $pat ; then
+      if [[ $line =~ $pat ]]; then
         break
       fi
       echo "$line" >> tempfile.txt
@@ -79,7 +79,7 @@ for file in $FINAL2
     rm tempfile.txt
 done
 
-#Run the diff between sets of files.
+#Run the diff between sets of files. 
 for file in $FINAL1
 do
   filename=${j%.*}
@@ -87,3 +87,4 @@ do
   output="${tinyname}.out"
   diff -b -s Step4/tinyout/$output Step4/usertest/outputs/$output
 done
+

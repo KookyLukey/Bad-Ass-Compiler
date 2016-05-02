@@ -56,6 +56,13 @@ class irConverter(object):
                     print("cmpi " + node.get_op1() + " " + node.get_op2())
                     print("jle " + node.get_result())
 
+                if (node.get_instr() == 'LEF'):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpr " + node.get_op1() + " " + node.get_op2())
+                    print("jle " + node.get_result())
+
                 if (node.get_instr() == 'GEI'):
                     temp = node.get_op2().lstrip('$T')
                     temp = int(temp) - 1
@@ -253,6 +260,84 @@ class irConverter(object):
                     node.set_result("r"+str(temp))
                     print("move " + node.get_op1() + " " + node.get_result())
                     print("mulr " + node.get_op2() + " " + node.get_result())
+
+                if(node.get_instr() == 'GTI' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jgt " + node.get_result())
+                elif(node.get_instr() == 'GTI' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jgt " + node.get_result())
+
+                if(node.get_instr() == 'GTF' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    print("cmpr " + node.get_op1() + " " + node.get_op2())
+                    print("jgt " + node.get_result())
+                elif(node.get_instr() == 'GTF' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpr " + node.get_op1() + " " + node.get_op2())
+                    print("jgt " + node.get_result())
+
+                if(node.get_instr() == 'GEI' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jge " + node.get_result())
+                elif(node.get_instr() == 'GEI' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jge " + node.get_result())
+
+                if(node.get_instr() == 'GEF' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    print("cmpr " + node.get_op1() + " " + node.get_op2())
+                    print("jge " + node.get_result())
+                elif(node.get_instr() == 'GEF' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpr " + node.get_op1() + " " + node.get_op2())
+                    print("jge " + node.get_result())
+
+                if(node.get_instr() == 'NEI' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jne " + node.get_result())
+                elif(node.get_instr() == 'NEI' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpi " + node.get_op1() + " " + node.get_op2())
+                    print("jne " + node.get_result())
+
+                if(node.get_instr() == 'NEF' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    print("cmpr " + node.get_op1() + " " + node.get_op2())
+                    print("jne " + node.get_result())
+                elif(node.get_instr() == 'NEF' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    print("cmpr " + node.get_op1() + " " + node.get_op2())
+                    print("jne " + node.get_result())
 
                 node = node.get_next()
             else:
