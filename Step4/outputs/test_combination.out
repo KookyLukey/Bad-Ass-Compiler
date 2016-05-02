@@ -1,6 +1,6 @@
 ;IR code
 ;LABEL main
-;LINK 
+;LINK
 ;STOREI 20 $T1
 ;STOREI $T1 a
 ;STOREI 30 $T2

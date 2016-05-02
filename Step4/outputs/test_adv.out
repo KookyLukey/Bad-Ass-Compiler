@@ -1,6 +1,6 @@
 ;IR code
 ;LABEL main
-;LINK 
+;LINK
 ;STOREF 0.0001 $T1
 ;STOREF $T1 tolerance
 ;STOREF 7.0 $T2
@@ -54,7 +54,7 @@ var approx
 var num
 var tolerance
 var diff
-label main 
+label main
 move 0.0001 r0
 move r0 tolerance
 move 7.0 r1
@@ -67,7 +67,7 @@ move 0.0 r4
 move r4 diff
 move 0 r5
 move r5 enough
-label label1 
+label label1
 move 1 r6
 cmpi enough r6
 jeq label2
@@ -94,9 +94,9 @@ cmpr diff r15
 jge label4
 move 1 r16
 move r16 enough
-label label4 
-jmp label5 
-label label3 
+label label4
+jmp label5
+label label3
 move 0.0 r17
 move r17 r18
 subr tolerance r18
@@ -104,12 +104,12 @@ cmpr diff r18
 jle label6
 move 1 r19
 move r19 enough
-label label6 
-label label5 
+label label6
+label label5
 move newapprox r2
 move r2 approx
-jmp label1 
-label label2 
-sys writer approx 
-sys writei count 
+jmp label1
+label label2
+sys writer approx
+sys writei count
 sys halt

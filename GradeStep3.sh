@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INPUTS=Step4/inputs/step4_testcase.micro
+INPUTS=Step4/inputs/test_mult.micro
 mkdir Step4/usertest
 for i in $INPUTS
 	do
