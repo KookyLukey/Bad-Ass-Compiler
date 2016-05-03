@@ -6,12 +6,12 @@ BEGIN
 
 	FUNCTION VOID main()
 	BEGIN
-	
-		num := 7.0;	
+
+		num := 7.0;
 		i := 100;
 		j := 1;
-		approx := num;	
-	
+		approx := num;
+
         WHILE (i != 0)
 			newapprox := 0.5*(approx + num/approx);
 			approx := newapprox;

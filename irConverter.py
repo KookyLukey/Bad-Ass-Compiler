@@ -27,6 +27,17 @@ class irConverter(object):
                         node.set_op2("r"+str(temp))
                     print("move " + node.get_op1() + " " + node.get_op2())
 
+                if (node.get_instr() == 'STOREF'):
+
+                    if ("$T" in node.get_op1()):
+                        node.set_op1("r" + str(int(node.get_op1()[2:])-1))
+
+                    if ("$T" in node.get_op2()):
+                        temp = node.get_op2().lstrip('$T')
+                        temp = int(temp) - 1
+                        node.set_op2("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_op2())
+
                 if (node.get_instr() == 'LABEL'):
                     print("label " + node.get_op1())
 
@@ -38,6 +49,9 @@ class irConverter(object):
 
                 if (node.get_instr() == 'WRITEI'):
                     print("sys writei " + node.get_op1())
+
+                if (node.get_instr() == 'WRITEF'):
+                    print("sys writer " + node.get_op1())
 
                 if (node.get_instr() == 'WRITES'):
                     print("sys writes " + node.get_op1())
@@ -107,6 +121,44 @@ class irConverter(object):
                     print("move " + node.get_op1() + " " + node.get_result())
                     print("addi " + node.get_op2() + " " + node.get_result())
 
+                if (node.get_instr() == 'ADDF' and '$T' in node.get_op1() and '$T' in node.get_op2()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addr " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'ADDF' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addr " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'ADDF' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addr " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'ADDF'):
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("addr " + node.get_op2() + " " + node.get_result())
+
+
                 if (node.get_instr() == 'SUBI' and '$T' in node.get_op1() and '$T' in node.get_op2()):
                     temp = node.get_op1().lstrip('$T')
                     temp = int(temp) - 1
@@ -135,32 +187,76 @@ class irConverter(object):
                     temp = node.get_result().lstrip('$T')
                     temp = int(temp) - 1
                     node.set_result("r"+str(temp))
-                    print("move " + node.get_op2() + " " + node.get_result())
-                    print("subi " + node.get_op1() + " " + node.get_result())
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subi " + node.get_op2() + " " + node.get_result())
                 elif (node.get_instr() == 'SUBI'):
                     temp = node.get_result().lstrip('$T')
                     temp = int(temp) - 1
                     node.set_result("r"+str(temp))
                     print("move " + node.get_op1() + " " + node.get_result())
                     print("subi " + node.get_op2() + " " + node.get_result())
-                if (node.get_instr() == 'RET'):
-                    print("sys halt")
-                if (node.get_instr() == 'DIVF' and '$T' in node.get_op1() and '$T' in node.get_result()):
+
+                if (node.get_instr() == 'SUBF' and '$T' in node.get_op1() and '$T' in node.get_op2()):
                     temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subr " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'SUBF' and '$T' in node.get_op1()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
                     node.set_op1("r"+str(temp))
                     temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subr " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'SUBF' and '$T' in node.get_op2()):
+                    temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op2("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subr " + node.get_op2() + " " + node.get_result())
+                elif (node.get_instr() == 'SUBF'):
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_result("r"+str(temp))
+                    print("move " + node.get_op1() + " " + node.get_result())
+                    print("subr " + node.get_op2() + " " + node.get_result())
+
+                if (node.get_instr() == 'RET'):
+                    print("sys halt")
+
+                if (node.get_instr() == 'DIVF' and '$T' in node.get_op1() and '$T' in node.get_result()):
+                    temp = node.get_op1().lstrip('$T')
+                    temp = int(temp) - 1
+                    node.set_op1("r"+str(temp))
+                    temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
                     node.set_result("r"+str(temp))
                     print("move " + node.get_op1() + " " + node.get_result())
                     print("divr " + node.get_op2() + " " + node.get_result())
                 elif (node.get_instr() == 'DIVF' and '$T' in node.get_op2() and '$T' in node.get_result()):
                     temp = node.get_op2().lstrip('$T')
+                    temp = int(temp) - 1
                     node.set_op2("r"+str(temp))
                     temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
                     node.set_result("r"+str(temp))
                     print("move " + node.get_op1() + " " + node.get_result())
                     print("divr " + node.get_op2() + " " + node.get_result())
                 elif (node.get_instr() == 'DIVF' and '$T' in node.get_result()):
                     temp = node.get_result().lstrip('$T')
+                    temp = int(temp) - 1
                     node.set_result("r"+str(temp))
                     print("move " + node.get_op1() + " " + node.get_result())
                     print("divr " + node.get_op2() + " " + node.get_result())
